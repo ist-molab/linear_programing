@@ -20,9 +20,9 @@ class Solver:
 
 
 if __name__ == '__main__':
-    A = [[3, 2], [1, 2]]
-    b = [12, 8]
-    c = [-1, -1]
+    A = [[1, 3], [1, 1], [2, 1]]
+    b = [9, 4, 6]
+    c = [-2, -3]
     solver = Solver(c, A, b, method='naive')
     ans = solver.optimize()
     print(ans)

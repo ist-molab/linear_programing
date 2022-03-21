@@ -9,22 +9,26 @@ class Solver:
         self.b = np.array(b)
         self.num_constraints, self.num_var = self.A.shape
         self.exA = np.hstack((self.A, np.diag(np.ones(self.num_constraints))))
-        self.exb = np.hstack((self.b, np.zeros(self.num_constraints)))
         self.exc = np.hstack((self.c, np.zeros(self.num_constraints)))
 
     def optimize(self):
         idx_list = combinations(
-            np.arange(self.num_constraints + self.num_var), self.num_var)
+            np.arange(self.num_constraints + self.num_var), self.num_constraints)
 
         opt_val = np.inf
         opt_sol = np.zeros(self.num_constraints + self.num_var)
 
         for idx in idx_list:
-            vals = np.linalg.solve(self.exA[:, idx], self.exb[list(idx)])
+            try:
+                vals = np.linalg.solve(self.exA[:, idx], self.b)
+            except:
+                vals = np.linalg.pinv(self.exA[:, idx]) @ self.b
             temp_sol = np.zeros(self.num_constraints + self.num_var)
             for i, val in zip(idx, vals):
                 temp_sol[i] = val
             temp_val = self.exc @ temp_sol
+            if not (temp_sol + 1e-5 >= 0).all():
+                continue
             if temp_val < opt_val:
                 opt_val = temp_val
                 opt_sol = temp_sol
@@ -36,3 +40,12 @@ class Solver:
         }
 
         return ret
+
+
+if __name__ == '__main__':
+    A = [[3, 1, 2], [1, 3, 0], [0, 2, 4]]
+    b = [60, 36, 48]
+    c = [-150, -200, -300]
+    solver = Solver(c, A, b)
+    ans = solver.optimize()
+    print(ans)
